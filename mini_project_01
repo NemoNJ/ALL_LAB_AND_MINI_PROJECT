@@ -1,0 +1,106 @@
+#define motor1 19
+#define motor2 18
+#define motor3 17
+#define motor4 16
+#define led_open 22
+#define led_close 23
+#define led_on 21
+#define button1 35
+#define button2 34
+int i = 1;
+bool safety = true;
+//high = stop
+void checkbutton(){
+  digitalWrite(led_on, HIGH);
+  if(i == 1){
+         digitalWrite(led_close, HIGH);
+         digitalWrite(led_open, LOW);
+         i++;
+  }
+  //button control
+  if(digitalRead(button1) == LOW && digitalRead(button2) == HIGH && safety == true){
+      for(int i = 1;i < 140;i++) opendoor();
+      safety = false;
+  }
+  if(digitalRead(button1) == HIGH && digitalRead(button2) == LOW && safety == false) { 
+      for(int i = 1;i < 140;i++) closedoor();
+         digitalWrite(led_close, HIGH);
+         digitalWrite(led_open, LOW);
+         safety = true;
+       }
+  if(digitalRead(button1) ==  HIGH && digitalRead(button2) == HIGH){
+       stopdoor();   
+       }else{
+        stopdoor();
+       }
+       
+}
+void opendoor(){     
+digitalWrite(led_close, LOW);
+digitalWrite(led_open, HIGH);
+//step open
+digitalWrite(motor1, HIGH);
+digitalWrite(motor2, LOW);
+digitalWrite(motor3, LOW);
+digitalWrite(motor4, LOW);
+delay(8);
+digitalWrite(motor1, LOW);
+digitalWrite(motor2, HIGH);
+digitalWrite(motor3, LOW);
+digitalWrite(motor4, LOW);
+delay(8);
+digitalWrite(motor1, LOW);
+digitalWrite(motor2, LOW);
+digitalWrite(motor3, HIGH);
+digitalWrite(motor4, LOW);
+delay(8);
+digitalWrite(motor1, LOW);
+digitalWrite(motor2, LOW);
+digitalWrite(motor3, LOW);
+digitalWrite(motor4, HIGH);
+delay(8);
+}
+void closedoor(){
+digitalWrite(motor1, LOW);
+digitalWrite(motor2, LOW);
+digitalWrite(motor3, LOW);
+digitalWrite(motor4, HIGH);
+delay(8);
+digitalWrite(motor1, LOW);
+digitalWrite(motor2, LOW);
+digitalWrite(motor3, HIGH);
+digitalWrite(motor4, LOW);
+delay(8);
+digitalWrite(motor1, LOW);
+digitalWrite(motor2, HIGH);
+digitalWrite(motor3, LOW);
+digitalWrite(motor4, LOW);
+delay(8);
+digitalWrite(motor1, HIGH);
+digitalWrite(motor2, LOW);
+digitalWrite(motor3, LOW);
+digitalWrite(motor4, LOW);
+delay(8);
+}
+
+void stopdoor(){
+digitalWrite(motor1, LOW);
+digitalWrite(motor2, LOW);
+digitalWrite(motor3, LOW);
+digitalWrite(motor4, LOW);
+}
+void setup() {
+ pinMode(motor1, OUTPUT);
+ pinMode(motor2, OUTPUT);
+ pinMode(motor3, OUTPUT);
+ pinMode(motor4, OUTPUT);
+ pinMode(led_open, OUTPUT);
+ pinMode(led_close, OUTPUT);
+ pinMode(led_on, OUTPUT);
+ pinMode(button1, INPUT);
+ pinMode(button2, INPUT);
+}
+void loop(){
+  
+   checkbutton();
+  }
