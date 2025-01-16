@@ -17,7 +17,7 @@ char daysOfTheWeek[7][12] = {"Sunday", "Monday", "Tuesday", "Wednesday", "Thursd
 LCD_I2C lcd(0x27, 16, 2);
 
 const char ssid[] = "HONOR 90";
-const char pass[] = "065516639545";
+const char pass[] = "-";
 String status;  // Initial state
 String lastStatus = "";  // Store the last received status to prevent duplicates
 const char mqtt_broker[] = "test.mosquitto.org";
