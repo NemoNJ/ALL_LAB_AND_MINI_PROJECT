@@ -1,0 +1,229 @@
+#include <WiFi.h>
+#include <MQTT.h>
+#include <LCD_I2C.h>
+// #include "RTClib.h"
+
+
+#define motor1 19
+#define motor2 18
+#define motor3 17
+#define motor4 16
+#define led_on 23
+#define button1 35
+#define button2 34
+
+// RTC_DS1307 rtc;
+char daysOfTheWeek[7][12] = {"Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"};
+LCD_I2C lcd(0x27, 16, 2);
+
+const char ssid[] = "HONOR 90";
+const char pass[] = "065516639545";
+String status;  // Initial state
+String lastStatus = "";  // Store the last received status to prevent duplicates
+const char mqtt_broker[] = "test.mosquitto.org";
+const char mqtt_topic[] = "group1/miniproject2";
+const char mqtt_client_id[] = "arduino_group_1"; // Must change this string to a unique value
+int MQTT_PORT = 1883;
+int i = 1;
+
+WiFiClient net;
+MQTTClient client;
+
+unsigned long lastMillis = 0;
+bool safety = true;
+
+// Wi-Fi connect process
+void connect() {
+  Serial.print("checking wifi...");
+  while (WiFi.status() != WL_CONNECTED) {
+    Serial.print(".");
+    delay(1000);
+  }
+
+  Serial.print("\nconnecting...");
+  while (!client.connect(mqtt_client_id)) {
+    Serial.print(".");
+    delay(1000);
+  }
+
+  Serial.println("\nconnected!");
+  client.subscribe(mqtt_topic);
+}
+
+void messageReceived(String &topic, String &payload) {
+  Serial.println("incoming: " + topic + " - " + payload);
+  
+  // Check if the received message is different from the last received message
+  if (payload != lastStatus) {
+    status = payload;  // Update status only if it is different
+    lastStatus = payload;  // Store the current status to prevent duplicates
+  }
+}
+
+// Button control and MQTT control logic
+void checkbutton() {
+
+  client.loop();
+  delay(10);  // <- fixes some issues with WiFi stability
+
+  if (!client.connected()) {
+    connect();
+  }
+  if(i == 1){
+    lcd.clear();
+    lcd.setCursor(1, 0);
+    lcd.print("SATETY DOOR"); 
+    lcd.setCursor(1, 1);
+    lcd.print("THE DOOR CLOSE"); 
+    i++;
+  }
+
+  digitalWrite(led_on, HIGH);
+
+  // Button control
+  if (digitalRead(button1) == LOW && digitalRead(button2) == HIGH && safety == true) {
+    for (int i = 1; i < 140; i++) opendoor();
+    safety = false;
+  }
+  if (digitalRead(button1) == HIGH && digitalRead(button2) == LOW && safety == false) {
+    for (int i = 1; i < 180; i++) closedoor();
+    lcd.clear();
+    lcd.backlight();
+    lcd.setCursor(1, 0);
+    lcd.print("SATETY DOOR"); 
+    lcd.setCursor(1, 1);
+    lcd.print("THE DOOR CLOSE"); 
+    safety = true;
+  }
+
+  // MQTT control (from the received status)
+  if (status == "on" && safety == true) {
+    for (int i = 1; i < 140; i++) opendoor();
+    safety = false;
+  }
+  if (status == "off" && safety == false) {
+    for (int i = 1; i < 180; i++) closedoor();
+    lcd.clear();
+    lcd.backlight();
+    lcd.setCursor(1, 0);
+    lcd.print("SATETY DOOR"); 
+    lcd.setCursor(1, 1);
+    lcd.print("THE DOOR CLOSE"); 
+    safety = true;
+  }
+  
+  // Always stop the door if both buttons are high
+  if (digitalRead(button1) == HIGH && digitalRead(button2) == HIGH) {
+    stopdoor();
+  } else {
+    stopdoor();
+  }
+}
+
+void opendoor() {
+  lcd.clear();
+  lcd.backlight();
+  lcd.setCursor(1, 0);
+  lcd.print("SATETY DOOR"); 
+  lcd.setCursor(1, 1);
+  lcd.print("THE DOOR OPEN"); 
+  // Rotate motors in sequence to open door
+  digitalWrite(motor1, HIGH);
+  digitalWrite(motor2, LOW);
+  digitalWrite(motor3, LOW);
+  digitalWrite(motor4, LOW);
+  delay(8);
+  
+  digitalWrite(motor1, LOW);
+  digitalWrite(motor2, HIGH);
+  digitalWrite(motor3, LOW);
+  digitalWrite(motor4, LOW);
+  delay(8);
+  
+  digitalWrite(motor1, LOW);
+  digitalWrite(motor2, LOW);
+  digitalWrite(motor3, HIGH);
+  digitalWrite(motor4, LOW);
+  delay(8);
+  
+  digitalWrite(motor1, LOW);
+  digitalWrite(motor2, LOW);
+  digitalWrite(motor3, LOW);
+  digitalWrite(motor4, HIGH);
+  delay(8);
+}
+
+void closedoor() {
+  // Rotate motors in sequence to close door
+  digitalWrite(motor1, LOW);
+  digitalWrite(motor2, LOW);
+  digitalWrite(motor3, LOW);
+  digitalWrite(motor4, HIGH);
+  delay(8);
+  
+  digitalWrite(motor1, LOW);
+  digitalWrite(motor2, LOW);
+  digitalWrite(motor3, HIGH);
+  digitalWrite(motor4, LOW);
+  delay(8);
+  
+  digitalWrite(motor1, LOW);
+  digitalWrite(motor2, HIGH);
+  digitalWrite(motor3, LOW);
+  digitalWrite(motor4, LOW);
+  delay(8);
+  
+  digitalWrite(motor1, HIGH);
+  digitalWrite(motor2, LOW);
+  digitalWrite(motor3, LOW);
+  digitalWrite(motor4, LOW);
+  delay(8);
+}
+
+void stopdoor() {
+  digitalWrite(motor1, LOW);
+  digitalWrite(motor2, LOW);
+  digitalWrite(motor3, LOW);
+  digitalWrite(motor4, LOW);
+}
+
+void CheckWIFI() {
+  if (WiFi.status() == WL_CONNECTED) {
+    digitalWrite(led_on, HIGH);
+  } else {
+    digitalWrite(led_on, LOW);
+  }
+}
+
+void setup() {
+  Serial.begin(9600);
+  //wifi
+  WiFi.begin(ssid, pass);
+  client.begin(mqtt_broker, MQTT_PORT, net);
+  client.onMessage(messageReceived);
+  connect();
+  
+  //lcd
+  lcd.begin();
+  lcd.backlight();
+  // if (!rtc.begin()) {
+  //       lcd.print("Couldn't find RTC");
+  //       while (1);
+  //   }
+
+  // if (!rtc.isrunning()) {
+  //       rtc.adjust(DateTime(F(__DATE__), F(__TIME__)));
+  //   }
+  pinMode(motor1, OUTPUT);
+  pinMode(motor2, OUTPUT);
+  pinMode(motor3, OUTPUT);
+  pinMode(motor4, OUTPUT);
+  pinMode(led_on, OUTPUT);
+  pinMode(button1, INPUT);
+  pinMode(button2, INPUT);
+  
+}
+void loop() {
+  CheckWIFI();
+  checkbutton();
+}
