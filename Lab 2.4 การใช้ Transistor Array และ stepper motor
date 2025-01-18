@@ -1,0 +1,60 @@
+#define led  23
+#define button 36
+#define motor1 19
+#define motor2 18
+#define motor3 17
+#define motor4 16
+// stepper motor ควรใช้ pin 19 18 17 16
+void setup() {
+  // initialize digital pin LED_BUILTIN as an output.
+   pinMode(led,OUTPUT);
+   pinMode(motor1,OUTPUT);
+   pinMode(motor2,OUTPUT);
+   pinMode(motor3,OUTPUT);
+   pinMode(motor4,OUTPUT);
+   pinMode(button,INPUT);
+}// the loop function runs over and over again forever
+void stepper_move(){
+  digitalWrite(motor1,HIGH);  
+  digitalWrite(motor2,LOW);
+  digitalWrite(motor3,LOW);
+  digitalWrite(motor4,LOW);
+  delay(8);
+  digitalWrite(motor1,LOW);  
+  digitalWrite(motor2,HIGH);
+  digitalWrite(motor3,LOW);
+  digitalWrite(motor4,LOW);
+  delay(8);
+  digitalWrite(motor1,LOW);  
+  digitalWrite(motor2,LOW);
+  digitalWrite(motor3,HIGH);
+  digitalWrite(motor4,LOW);
+  delay(8);
+  digitalWrite(motor1,LOW);  
+  digitalWrite(motor2,LOW);
+  digitalWrite(motor3,LOW);
+  digitalWrite(motor4,HIGH);
+  delay(8);
+}
+// void loop() {
+//   if(digitalRead(button) == LOW){
+//     stepper_move();
+//     digitalWrite(led,HIGH);
+//   }else{
+//     digitalWrite(led,LOW);
+//  }
+// }
+
+
+//ถ้าจะทำเป็น mode auto
+void press_Button(){
+   if(digitalRead(button) == LOW){
+    digitalWrite(led,HIGH);
+    for(int i = 1; i < 120 ;i++) stepper_move();
+  }else{
+    digitalWrite(led,LOW);
+ }
+}
+void loop(){
+  press_Button();
+}
