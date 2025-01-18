@@ -1,0 +1,43 @@
+#define led_forward    23
+#define led_back       22
+#define motor_forward  19
+#define motor_back     18
+#define button         36
+bool turn = true;
+//H bridge enable และ VCC ต้องต่อ 5 volt เท่านั้น
+//ใน lab นี้เราประยุกต์ปุ่มกดด้วย
+
+void setup(){
+   pinMode(led_forward,OUTPUT);
+   pinMode(led_back ,OUTPUT);
+   pinMode(motor_forward,OUTPUT);
+   pinMode(motor_back,OUTPUT);
+   pinMode(button,INPUT);
+}
+
+void Press_Button(){
+  if(digitalRead(button) == LOW && turn == true){
+    digitalWrite(led_forward,HIGH);
+    digitalWrite(led_back,LOW);
+    digitalWrite(motor_forward,HIGH);
+    digitalWrite(motor_back,LOW);
+    delay(5000);
+    turn = false;
+  }else if(digitalRead(button) == LOW && turn == false){
+    digitalWrite(led_forward,LOW);
+    digitalWrite(led_back,HIGH);
+    digitalWrite(motor_forward,LOW);
+    digitalWrite(motor_back,HIGH);
+    delay(5000);
+    turn = true;
+  }else{
+    digitalWrite(led_forward,LOW);
+    digitalWrite(led_back,LOW);
+    digitalWrite(motor_forward,LOW);
+    digitalWrite(motor_back,LOW);
+  }
+}
+void loop(){
+   Press_Button();
+}
+
