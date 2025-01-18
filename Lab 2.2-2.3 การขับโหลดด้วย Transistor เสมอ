@@ -1,0 +1,20 @@
+#define led  23
+#define button 36
+#define motor 22
+// 5 Volt ทั้ง base และ collector transistor
+//this code can control buton
+void setup() {
+  // initialize digital pin LED_BUILTIN as an output.
+   pinMode(led,OUTPUT);
+   pinMode(motor,OUTPUT);
+   pinMode(button,INPUT);
+}// the loop function runs over and over again forever
+void loop() {
+  if(digitalRead(button) == LOW){
+    digitalWrite(motor,HIGH);
+    digitalWrite(led,HIGH);
+  }else{
+    digitalWrite(motor,LOW);
+    digitalWrite(led,LOW);
+  }
+}
