@@ -1,4 +1,3 @@
-
 #include <WiFi.h>
 #include <MQTT.h>
 #define led_forward    23
@@ -15,7 +14,7 @@ const char ssid[] = "HONOR 90";
 const char pass[] = "065516639545";
 String status;//initial state
 const char mqtt_broker[]="test.mosquitto.org";
-const char mqtt_topic[]="group1/miniproject2";
+const char mqtt_topic[]="group1/practice/command";
 const char mqtt_client_id[]="arduino_group_1"; // must change this string to a unique value
 int MQTT_PORT=1883;
 
@@ -78,7 +77,7 @@ void Press_Button(){
   }
   Serial.println("THIS STATUS NOW");
   Serial.println(status);
-  if(digitalRead(button) == LOW ||status == "press" && turn == true){
+  if(digitalRead(button) == LOW && turn == true){
     digitalWrite(led_forward,HIGH);
     digitalWrite(led_back,LOW);
     digitalWrite(motor_forward,HIGH);
@@ -86,7 +85,7 @@ void Press_Button(){
     delay(5000);
     turn = false;
     status = " ";
-  }else if(digitalRead(button) == LOW || status == "press" && turn == false){
+  }else if(digitalRead(button) == LOW && turn == false){
     digitalWrite(led_forward,LOW);
     digitalWrite(led_back,HIGH);
     digitalWrite(motor_forward,LOW);
@@ -95,22 +94,24 @@ void Press_Button(){
     turn = true;
     status = " ";
   }
-  // if(status == "press" && turn == true){
-  //   digitalWrite(led_forward,HIGH);
-  //   digitalWrite(led_back,LOW);
-  //   digitalWrite(motor_forward,HIGH);
-  //   digitalWrite(motor_back,LOW);
-  //   delay(5000);
-  //   turn = false;
-  // }if(status == "press" && turn == false){
-  //   digitalWrite(led_forward,LOW);
-  //   digitalWrite(led_back,HIGH);
-  //   digitalWrite(motor_forward,LOW);
-  //   digitalWrite(motor_back,HIGH);
-  //   delay(5000);
-  //   turn = true;
-  // }
-  // 
+  if(status == "on" && turn == true){
+    digitalWrite(led_forward,HIGH);
+    digitalWrite(led_back,LOW);
+    digitalWrite(motor_forward,HIGH);
+    digitalWrite(motor_back,LOW);
+    delay(5000);
+    turn = false;
+    status = " ";
+  }if(status == "on" && turn == false){
+    digitalWrite(led_forward,LOW);
+    digitalWrite(led_back,HIGH);
+    digitalWrite(motor_forward,LOW);
+    digitalWrite(motor_back,HIGH);
+    delay(5000);
+    turn = true;
+    status = " ";
+  }
+  
   else{
     digitalWrite(led_forward,LOW);
     digitalWrite(led_back,LOW);
