@@ -1,0 +1,25 @@
+#define LDR  36
+#define led  23
+int LDR_Value=0;
+int thesold_off = 900;
+int thesold_on = 750;
+//pull down สว่างมากหลอดไฟสว่างตาม
+//pull up   สว่างน้อยหลอดไฟจึงจะสว่าง
+void setup() {
+  Serial.begin(9600);
+  pinMode(led,OUTPUT);
+}
+//pull down
+void loop() {
+  LDR_Value = analogRead(LDR);
+if(LDR_Value > thesold_off) digitalWrite(led,LOW);
+if(LDR_Value < thesold_on) digitalWrite(led,HIGH);
+  Serial.print("Variable_1:");
+  Serial.print(LDR_Value);
+  Serial.print(",");
+  Serial.print("Variable_2:");
+  Serial.println(thesold_off);
+  Serial.print("Variable_3:");
+  Serial.println(thesold_on);
+  delay(20);
+}
