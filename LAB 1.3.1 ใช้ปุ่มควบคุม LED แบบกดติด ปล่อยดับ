@@ -1,0 +1,16 @@
+#define led  23
+#define button 22
+void setup() {
+  // initialize digital pin LED_BUILTIN as an output.
+   pinMode(led,OUTPUT);
+   pinMode(button,INPUT);
+}// the loop function runs over and over again forever
+void loop() {
+  if(digitalRead(button) == LOW){
+    digitalWrite(led,HIGH);
+    delay(1000);
+  }else{
+    digitalWrite(led,LOW);
+    delay(1000);
+  }
+}
