@@ -1,0 +1,20 @@
+#define led  23
+#define button 22
+int count = 0;
+void setup() {
+  Serial.begin(9600);
+  // initialize digital pin LED_BUILTIN as an output.
+   pinMode(led,OUTPUT);
+   pinMode(button,INPUT);
+}// the loop function runs over and over again forever
+void loop() {
+  if(digitalRead(button) == LOW){
+    digitalWrite(led,HIGH);
+    delay(300);
+    count++;
+  }else{
+    digitalWrite(led,LOW);
+    delay(300);
+  }
+  Serial.println(count);
+}
