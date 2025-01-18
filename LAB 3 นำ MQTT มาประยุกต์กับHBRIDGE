@@ -1,1 +1,125 @@
 
+#include <WiFi.h>
+#include <MQTT.h>
+#define led_forward    23
+#define led_back       22
+#define motor_forward  19
+#define motor_back     18
+#define button         36
+#define led_on         5
+bool turn = true;
+//H bridge enable และ VCC ต้องต่อ 5 volt เท่านั้น
+
+//MQTT
+const char ssid[] = "HONOR 90";
+const char pass[] = "065516639545";
+String status;//initial state
+const char mqtt_broker[]="test.mosquitto.org";
+const char mqtt_topic[]="group1/miniproject2";
+const char mqtt_client_id[]="arduino_group_1"; // must change this string to a unique value
+int MQTT_PORT=1883;
+
+WiFiClient net;
+MQTTClient client;
+
+
+void connect() {
+  Serial.print("checking wifi...");
+  while (WiFi.status() != WL_CONNECTED) {
+    Serial.print(".");
+    delay(1000);
+  }
+
+  Serial.print("\nconnecting...");
+  while (!client.connect(mqtt_client_id)) {  
+    Serial.print(".");
+    delay(1000);
+  }
+
+  Serial.println("\nconnected!");
+
+  client.subscribe(mqtt_topic);
+  // client.unsubscribe("/hello");
+}
+
+void messageReceived(String &topic, String &payload) {
+  Serial.println("incoming: " + topic + " - " + payload);
+    status = payload;  // Update status only if it is different
+}
+
+void CheckWIFI() {
+  if (WiFi.status() == WL_CONNECTED) {
+    digitalWrite(led_on, HIGH);
+  } else {
+    digitalWrite(led_on, LOW);
+  }
+}
+void setup(){
+  Serial.begin(9600);
+  WiFi.begin(ssid, pass);
+  // Note: Local domain names (e.g. "Computer.local" on OSX) are not supported
+  // by Arduino. You need to set the IP address directly.
+  client.begin(mqtt_broker, MQTT_PORT, net);
+  client.onMessage(messageReceived);
+  connect();
+   pinMode(led_forward,OUTPUT);
+   pinMode(led_back ,OUTPUT);
+   pinMode(motor_forward,OUTPUT);
+   pinMode(motor_back,OUTPUT);
+   pinMode(button,INPUT);
+}
+
+void Press_Button(){
+  client.loop();
+  delay(10);  // <- fixes some issues with WiFi stability
+
+  if (!client.connected()) {
+    connect();
+  }
+  Serial.println("THIS STATUS NOW");
+  Serial.println(status);
+  if(digitalRead(button) == LOW ||status == "press" && turn == true){
+    digitalWrite(led_forward,HIGH);
+    digitalWrite(led_back,LOW);
+    digitalWrite(motor_forward,HIGH);
+    digitalWrite(motor_back,LOW);
+    delay(5000);
+    turn = false;
+    status = " ";
+  }else if(digitalRead(button) == LOW || status == "press" && turn == false){
+    digitalWrite(led_forward,LOW);
+    digitalWrite(led_back,HIGH);
+    digitalWrite(motor_forward,LOW);
+    digitalWrite(motor_back,HIGH);
+    delay(5000);
+    turn = true;
+    status = " ";
+  }
+  // if(status == "press" && turn == true){
+  //   digitalWrite(led_forward,HIGH);
+  //   digitalWrite(led_back,LOW);
+  //   digitalWrite(motor_forward,HIGH);
+  //   digitalWrite(motor_back,LOW);
+  //   delay(5000);
+  //   turn = false;
+  // }if(status == "press" && turn == false){
+  //   digitalWrite(led_forward,LOW);
+  //   digitalWrite(led_back,HIGH);
+  //   digitalWrite(motor_forward,LOW);
+  //   digitalWrite(motor_back,HIGH);
+  //   delay(5000);
+  //   turn = true;
+  // }
+  // 
+  else{
+    digitalWrite(led_forward,LOW);
+    digitalWrite(led_back,LOW);
+    digitalWrite(motor_forward,LOW);
+    digitalWrite(motor_back,LOW);
+  }
+}
+void loop(){
+  CheckWIFI();
+   Press_Button();
+}
+
