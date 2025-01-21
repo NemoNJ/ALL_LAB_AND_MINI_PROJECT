@@ -1,0 +1,28 @@
+//perfect edition
+#define LED     23
+#define BUTTON  19
+
+int count = 0;
+bool last_state = HIGH;
+
+void setup() {
+  Serial.begin(9600);
+  pinMode(BUTTON, INPUT); // set arduino pin to input mode
+  pinMode(LED, OUTPUT);  // set arduino pin to output mode
+}void loop() {
+   button();
+}
+void button(){
+   //solve ปัญหากดซ้ำ 1 ปุ่ม
+   bool button_state = digitalRead(BUTTON);
+  if(button_state == LOW && last_state == HIGH) { 
+    digitalWrite(LED, HIGH);
+    count++;
+    Serial.println("MY COUNT : ");
+    Serial.println(count);
+    delay(300);//ต้องใส่เพื่อมีเวลาให้LED สว่าง
+  }else{
+    digitalWrite(LED,LOW);
+  }
+  last_state = button_state;
+}
