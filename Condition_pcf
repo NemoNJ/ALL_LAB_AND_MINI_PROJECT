@@ -1,0 +1,78 @@
+#include <Adafruit_PCF8574.h>
+/* Example for 1 output LED that is connected from power to the GPIO expander pin #7
+ * Note the LEDs must be connected with the CATHODES to the expander, to SINK current!
+ * The PCF8574 cannot SOURCE current!
+ */
+
+#define PCF8574_Address 0x20
+#define button          0
+Adafruit_PCF8574 pcf;//class : Adafruit_PCF8574 obj : pcf
+//ประกาศตัวแปร
+void setup() {
+  Serial.begin(9600);
+  Serial.println("Adafruit PCF8574 LED blink test");
+  if (!pcf.begin(PCF8574_Address, &Wire)) {
+    Serial.println("Couldn't find PCF8574");
+  }
+  pcf.pinMode(7, OUTPUT);
+  pcf.pinMode(button,INPUT);
+}
+void loop() {
+if(pcf.digitalRead(button)){
+  //logic ตรงข้ามกับ pin ปกติ
+  //หลอดไฟต่อกลับด้าน
+  pcf.digitalWrite(7,HIGH);
+}else{
+  pcf.digitalWrite(7,LOW);
+}
+}
+อา. 11:59 น.
+คุณส่ง
+#include <Adafruit_PCF8574.h>
+#include <LCD_I2C.h>
+#include "RTClib.h"
+
+#define PCF8574_Address 0x20
+#define button          0
+
+LCD_I2C lcd(0x27, 16, 2); // Default address of most PCF8574 modules, change according
+RTC_DS1307 rtc;
+Adafruit_PCF8574 pcf;//class : Adafruit_PCF8574 obj : pcf
+
+char daysOfTheWeek[7][12] = {"Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"};
+//ประกาศตัวแปร
+void setup() {
+  Serial.begin(9600);
+  lcd.begin();
+   lcd.backlight();//จอสว่าง
+  Serial.println("Adafruit PCF8574 LED blink test");
+  if (!pcf.begin(PCF8574_Address, &Wire)) {
+    Serial.println("Couldn't find PCF8574");
+  }  
+  if (! rtc.begin()) {
+    Serial.println("Couldn't find RTC");
+    Serial.flush();
+    while (1) delay(10);
+  }
+
+  if (! rtc.isrunning()) {
+    Serial.println("RTC is NOT running, let's set the time!");
+    rtc.adjust(DateTime(F(_DATE_), F(_TIME_)));
+  }
+  pcf.pinMode(7, OUTPUT);
+  pcf.pinMode(button,INPUT);
+}
+void loop() {
+if(pcf.digitalRead(button)){
+  //logic ตรงข้ามกับ pin ปกติ
+  //หลอดไฟต่อกลับด้าน
+  lcd.print("HELLO HIGH");//มันจะแสดง HELLO LOW เพราะ สั่งผ่านตัว board
+  pcf.digitalWrite(7,HIGH);
+  delay(3000);
+}else{
+  pcf.digitalWrite(7,LOW);
+  lcd.print("HELLO LOW");
+  delay(3000);
+}
+lcd.clear();
+}
